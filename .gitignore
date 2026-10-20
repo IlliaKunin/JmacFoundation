@@ -1,0 +1,18 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+.venv/
+.vscode/
+__pycache__/
+*.py[cod]
+
+# User data, contact lists, search exports and backups stay out of GitHub.
+*.csv
+*.json
+*.xlsx
+*.db
+*.sqlite*
+*.tmp
+exports/

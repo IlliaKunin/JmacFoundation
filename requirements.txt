@@ -1,0 +1,8 @@
+tavily-python
+trafilatura
+groq
+python-dotenv
+pandas
+streamlit
+tiktoken
+psycopg[binary]>=3.2,<4
