@@ -1,13 +1,17 @@
 import logging
 import hashlib
+from pathlib import Path
 
 import streamlit as st
+from dotenv import load_dotenv
 
 from main import run_workflow
 from news_workflow import run_news_workflow
 from seller_contacts import seller_article_table
 from storage import count_news_articles, save_news_table_edits, load_donors, load_funding_research, load_news_articles, load_seller_contacts, unique_donor_names
 
+
+load_dotenv(Path(__file__).with_name(".env"))
 
 st.set_page_config(page_title="Donor & News Search", page_icon="🔎", layout="wide")
 

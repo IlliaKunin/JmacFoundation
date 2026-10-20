@@ -543,6 +543,11 @@ class NewsWorkflowTests(unittest.TestCase):
 
 
 class NewsInterfaceTests(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict("os.environ", {"DATABASE_URL": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
+
     def test_saved_table_loads_without_search_and_retains_results_on_error(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "news.csv"

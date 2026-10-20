@@ -156,6 +156,11 @@ class ContactSearchTests(unittest.TestCase):
 
 
 class SellerContactsInterfaceTests(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict("os.environ", {"DATABASE_URL": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
+
     def test_single_search_and_table_include_article_context_and_linkedin(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "contacts.csv"

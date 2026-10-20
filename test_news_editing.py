@@ -13,6 +13,9 @@ from seller_contacts import seller_article_table
 
 class NewsEditingTests(unittest.TestCase):
     def setUp(self):
+        environment = patch.dict("os.environ", {"DATABASE_URL": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.path = Path(directory.name) / "news.csv"

@@ -155,6 +155,11 @@ class SearchTests(unittest.TestCase):
 
 
 class InterfaceTests(unittest.TestCase):
+    def setUp(self):
+        environment = patch.dict("os.environ", {"DATABASE_URL": ""})
+        environment.start()
+        self.addCleanup(environment.stop)
+
     def test_single_page_uses_source_count_and_shows_all_saved_results(self):
         donors = pd.DataFrame(columns=storage.COLUMNS)
         state = {"funding": pd.DataFrame(columns=storage.FUNDING_COLUMNS)}
