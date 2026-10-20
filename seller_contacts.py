@@ -162,7 +162,9 @@ def seller_article_table(news, cached):
     result = news.loc[
         news["deal_side"].eq("Seller") & news["participant_name"].map(normalize_title).ne("")
     ].copy().reset_index(drop=True)
-    result["_row_revision"] = [news_row_revision(row) for row in result.to_dict("records")]
+    result["_row_revision"] = pd.Series(
+        [news_row_revision(row) for row in result.to_dict("records")], index=result.index, dtype="string",
+    )
     by_key = {row["contact_key"]: row for row in cached.to_dict("records")}
     matches = [by_key.get(seller_contact_key(row), {}) for row in result.to_dict("records")]
     overrides = [
@@ -171,7 +173,12 @@ def seller_article_table(news, cached):
     ]
     result = result.drop(columns="contact_overrides", errors="ignore")
     for field in CONTACT_FIELDS:
-        result[field] = [manual.get(field, saved.get(field, "")) for manual, saved in zip(overrides, matches)]
+        # An empty list otherwise becomes float64, which cannot be edited as
+        # TextColumn/LinkColumn when a fresh cloud database has no sellers yet.
+        result[field] = pd.Series(
+            [manual.get(field, saved.get(field, "")) for manual, saved in zip(overrides, matches)],
+            index=result.index, dtype="string",
+        )
     result.attrs.update(news.attrs)
     return result
 

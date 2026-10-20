@@ -548,6 +548,27 @@ class NewsInterfaceTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
 
+    def test_empty_or_no_seller_table_renders_without_contact_type_errors(self):
+        empty = pd.DataFrame(columns=storage.NEWS_ARTICLE_COLUMNS)
+        buyer_only = pd.DataFrame([{
+            **dict.fromkeys(storage.NEWS_ARTICLE_COLUMNS, ""),
+            "participant_name": "Buyer", "participant_type": "company", "deal_side": "Buyer",
+            "url": "https://example.org/buyer-sale",
+        }])
+        for news in (empty, buyer_only):
+            with self.subTest(rows=len(news)), \
+                 patch("storage.load_news_articles", return_value=news), \
+                 patch("storage.load_seller_contacts", return_value=pd.DataFrame(columns=storage.SELLER_CONTACT_COLUMNS)), \
+                 patch("storage.load_donors", return_value=pd.DataFrame(columns=storage.COLUMNS)), \
+                 patch("storage.load_funding_research", return_value=pd.DataFrame(columns=storage.FUNDING_COLUMNS)), \
+                 patch("news_workflow.run_news_workflow") as search:
+                app = AppTest.from_file(str(Path(__file__).with_name("app.py"))).run(timeout=20)
+                self.assertFalse(app.exception)
+                self.assertTrue(app.tabs[1].dataframe[0].value.empty)
+                self.assertTrue(app.button(key="save_news_edits").disabled)
+                self.assertFalse(app.button(key="start_news_search").disabled)
+                search.assert_not_called()
+
     def test_saved_table_loads_without_search_and_retains_results_on_error(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "news.csv"
