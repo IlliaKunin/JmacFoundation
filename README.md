@@ -23,10 +23,12 @@ Without `DATABASE_URL`, data stays in local CSV files. With `DATABASE_URL`, all 
 ## Deploy on Streamlit Community Cloud
 
 1. Push this project's source files to your GitHub repository. The `.gitignore` excludes keys, local data, contact lists and backups.
-2. Create a persistent PostgreSQL database with your database provider. Obtain its PostgreSQL connection string (a direct or transaction-pooler connection is supported). The application creates its `research_documents` table automatically; the database user must have table-creation permission.
+2. Create a persistent PostgreSQL database with your database provider. Obtain its PostgreSQL connection string (direct, session-pooler and transaction-pooler connections are supported). The application creates its `jmac_private.research_documents` table automatically; the database user must have schema/table-creation permission. The private schema keeps research data out of Supabase's public Data API. Automatic prepared statements are disabled for transaction poolers.
 3. In Streamlit Community Cloud, create an app from your repository and select `app.py`. Use Python 3.12 or newer.
 4. In **Advanced settings / Secrets**, add the top-level settings from `.streamlit/secrets.toml.example` with real keys and `DATABASE_URL`.
 5. Deploy, then choose public or restricted access in the app's sharing settings.
+
+For a step-by-step Supabase setup in Russian, see [DEPLOYMENT_RU.md](DEPLOYMENT_RU.md).
 
 `DATABASE_URL` is required for persistent shared data in Community Cloud. Local CSV/SQLite files there are not durable storage. If the database is unavailable, the application raises an error instead of silently saving data locally. Connection details and API keys belong in Secrets, never in GitHub or chat.
 

@@ -35,7 +35,7 @@ def uses_database(path):
 
 def _execute(connection, statement, params=()):
     if not isinstance(connection, sqlite3.Connection):
-        statement = statement.replace("?", "%s")
+        statement = statement.replace("?", "%s").replace("research_documents", "jmac_private.research_documents")
     return connection.execute(statement, params)
 
 
@@ -53,7 +53,7 @@ def storage_transaction(path):
         connection = sqlite3.connect(url[len("sqlite:///"):], timeout=30)
     elif url.startswith(("postgres://", "postgresql://")):
         import psycopg
-        connection = psycopg.connect(url, connect_timeout=15)
+        connection = psycopg.connect(url, connect_timeout=15, prepare_threshold=None)
     else:
         raise ValueError("DATABASE_URL must use postgresql:// or sqlite:///.")
     token = _active_connection.set(connection)
@@ -64,7 +64,9 @@ def storage_transaction(path):
             # Released by commit/rollback; works with transaction poolers too.
             connection.execute("SET LOCAL lock_timeout = '30s'")
             connection.execute("SELECT pg_advisory_xact_lock(%s)", (_LOCK_ID,))
-        connection.execute(_SCHEMA)
+            # Keep research data out of Supabase's exposed public API schema.
+            connection.execute("CREATE SCHEMA IF NOT EXISTS jmac_private")
+        _execute(connection, _SCHEMA)
         yield
         connection.commit()
     except BaseException:

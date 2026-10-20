@@ -145,10 +145,11 @@ class PostgreSQLAdapterTests(unittest.TestCase):
             with shared_storage.storage_transaction(path):
                 self.assertEqual(shared_storage.read_text(path), "csv contents")
                 shared_storage.write_text(path, "new content")
-        driver.connect.assert_called_once_with("postgresql://test-host/test-db", connect_timeout=15)
+        driver.connect.assert_called_once_with("postgresql://test-host/test-db", connect_timeout=15, prepare_threshold=None)
         statements = [call.args[0] for call in connection.execute.call_args_list]
         self.assertIn("SELECT pg_advisory_xact_lock(%s)", statements)
-        self.assertIn("SELECT content FROM research_documents WHERE name = %s", statements)
+        self.assertIn("CREATE SCHEMA IF NOT EXISTS jmac_private", statements)
+        self.assertIn("SELECT content FROM jmac_private.research_documents WHERE name = %s", statements)
         connection.commit.assert_called_once()
         connection.rollback.assert_not_called()
         connection.close.assert_called_once()
